@@ -346,6 +346,14 @@ button {
   gap: 12px;
 }
 
+.user-message {
+  flex-direction: row-reverse;
+}
+
+.bot-message {
+  flex-direction: row;
+}
+
 .message-avatar {
   flex-shrink: 0;
 }

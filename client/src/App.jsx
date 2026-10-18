@@ -4,11 +4,14 @@ import "./App.css";
 function App() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSend() {
     if (!message.trim()) return;
 
     const userMessage = message;
+
+    setIsLoading(true);  //start loading/thinking the response
 
     //fetch is used by react / frontend to send the HTTP request to backend.
     const response = await fetch("http://localhost:5000/api/chat", {
@@ -24,13 +27,22 @@ function App() {
     });
 
       const data = await response.json();  //Response body ko JSON se JavaScript value mein parse kar re h using response.json()
+      
+      setIsLoading(false);    //stop loading after response
 
       console.log("Backend reply:", data.reply);
 
     setMessages([            //This code is show the chat and reply the user in UI
       ...messages,  // It is used to spread the elements of existing array into new array.
       {
-        id: Date.now(),      
+         id: Date.now(),             //user's message's ID
+         text: userMessage,         // shows user's message in chat
+         sender: "user"             // Specifies who sent the message.
+      },
+      {
+        id: Date.now() + 1,        //ID for backend's reply
+        text: data.reply,          // shows backend's reply in chat
+        sender: "bot"
       },
     ]);
 
@@ -79,53 +91,57 @@ function App() {
           </button>
         </header>
 
-        <section className="chat-area">
-          {messages.length === 0 ? (
-            <div className="welcome">
-              <div className="welcome-icon">✳</div>
+      <section className="chat-area">
+             {messages.length === 0 ? (
+          <div className="welcome">
+             <div className="welcome-icon">✳</div>
 
-              <p className="eyebrow">YOUR AI WORKSPACE</p>
+             <p className="eyebrow">YOUR AI WORKSPACE</p>
 
-              <h1>
-                One workspace.
-                <br />
-                <span>Infinite possibilities.</span>
+             <h1>
+                   One workspace.
+                   <br />
+                  <span>Infinite possibilities.</span>
               </h1>
 
               <p className="subtitle">
-                Research, create, analyze and build.
-                <br />
-                Your AI journey starts here.
+                    Research, create, analyze and build.
+                     <br />
+                    Your AI journey starts here.
               </p>
 
               <div className="suggestions">
-                <button onClick={() => setMessage("Explain AI agents")}>
-                  ✦ Explain AI agents
-                </button>
+                    <button onClick={() => setMessage("Explain AI agents")}>
+                            ✦ Explain AI agents
+                    </button>
 
-                <button onClick={() => setMessage("Help me write code")}>
-                  &lt;/&gt; Help me write code
-                </button>
+                    <button onClick={() => setMessage("Help me write code")}>
+                        &lt;/&gt; Help me write code
+                      </button>
 
-                <button onClick={() => setMessage("Analyze a document")}>
-                  ▤ Analyze a document
-                </button>
-              </div>
-            </div>
+                     <button onClick={() => setMessage("Analyze a document")}>
+                        ▤ Analyze a document
+                    </button>
+               </div>
+           </div>
           ) : (
-            <div className="messages">
-              {messages.map((item) => (
-                <div className="message-row" key={item.id}>
-                  <div className="avatar message-avatar">A</div>
-                  <div className="message-content">
-                    <strong>You</strong>
-                    <p>{item.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+           <div className="messages">
+                  {messages.map((item) => (
+                   <div
+                        className={`message-row ${
+                         item.sender === "user" ? "user-message" : "bot-message" }`} key={item.id} >
+                     <div className="message-content">
+                         <strong>
+                              {item.sender === "user" ? "You" : "MAAP"}
+                          </strong>
+
+                          <p>{item.text}</p>
+                      </div>
+                    </div>
+                 ))}
+             </div>
+            )}
+      </section>
 
         <footer className="composer-wrapper">
           <div className="composer">
